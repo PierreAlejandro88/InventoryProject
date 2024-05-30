@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   nats-server:
@@ -18,7 +18,7 @@ services:
       - NATS_SERVICE=nats://nats-server:4222
     depends_on:
       - nats-server
-  
+
   products-ms:
     build: ./products-ms
     ports:
@@ -31,7 +31,7 @@ services:
       - NATS_SERVERS=nats://nats-server:4222
       - DATABASE_URL=file:./dev.db
       - TRANSPORT=TCP
-    
+
   orders-ms:
     build: ./orders-ms
     ports:
@@ -58,4 +58,21 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=amores123
       - POSTGRES_DB=orders_db
+
+  payments-ms:
+    container_name: payments-ms
+    build: ./payments-ms
+    ports:
+     - ${PAYMENTS_MS_PORT}:${PAYMENTS_MS_PORT}
+    volumes:
+      - ./payments-ms/src:/usr/src/app/src
+    command: npm run start:dev
+    environment:
+      - PORT=${PAYMENTS_MS_PORT}
+      - NATS_SERVER=nats://nats-server:4222
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - SUCCESS_PAYMENT_URL=${SUCCESS_PAYMENT_URL}
+      - CANCELLED_PAYMENT_URL=${CANCELLED_PAYMENT_URL}
+        
 
