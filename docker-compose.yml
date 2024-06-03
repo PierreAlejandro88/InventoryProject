@@ -63,7 +63,7 @@ services:
     container_name: payments-ms
     build: ./payments-ms
     ports:
-     - ${PAYMENTS_MS_PORT}:${PAYMENTS_MS_PORT}
+      - ${PAYMENTS_MS_PORT}:${PAYMENTS_MS_PORT}
     volumes:
       - ./payments-ms/src:/usr/src/app/src
     command: npm run start:dev
@@ -74,5 +74,16 @@ services:
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
       - SUCCESS_PAYMENT_URL=${SUCCESS_PAYMENT_URL}
       - CANCELLED_PAYMENT_URL=${CANCELLED_PAYMENT_URL}
-        
 
+  auth-ms:
+    container_name: auth-ms
+    build: ./auth-ms
+    volumes:
+      - ./auth-ms/src:/usr/src/app/src
+    command: npm run start:dev
+    environment:
+     - PORT=${AUTH_MS_PORT}
+     - NATS_SERVER=nats://nats-server:4222
+     - MONGO_DATABASE_URL=${AUTH_DATABASE_ULR}
+     - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+     - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
