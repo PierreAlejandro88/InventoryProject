@@ -1,0 +1,73 @@
+version: "3"
+
+services:
+  nats-server:
+    image: nats:latest
+
+  client-gateway:
+    build:
+      dockerfile: dockerfile.prod
+      context: ./client-gateway
+    image: client-gateway-prod
+    
+    ports:
+      - ${CLIENT_GATEWAY_PORT}:3000
+    environment:
+      - PORT=${CLIENT_GATEWAY_PORT}
+      - NATS_SERVICE=nats://nats-server:4222
+
+  auth-ms:
+    container_name: auth-ms
+    build: 
+     dockerfile: dockerfile.prod
+     context: ./auth-ms
+    image: auth-ms-prod
+    environment:
+    - PORT=${AUTH_MS_PORT}
+    - NATS_SERVER=nats://nats-server:4222
+    - MONGO_DATABASE_URL=${AUTH_DATABASE_ULR}
+    - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+
+  products-ms:
+    container_name: products-ms
+    build: 
+      dockerfile: dockerfile.prod
+      context: ./products-ms
+    image: products-ms-prod
+    environment:
+      - PORT=3001
+      - NATS_SERVERS=nats://nats-server:4222
+      - DATABASE_URL=file:/usr/src/app/prisma/dev.db  # Ruta actualizada
+      - TRANSPORT=TCP
+
+  orders-ms:
+    build: 
+     dockerfile: dockerfile.prod
+     context: ./orders-ms
+     args:
+      - ORDER_DATABASE_URL=${ORDER_DATABASE_URL}
+    image: orders-ms-prod
+    environment:
+      - PORT=3000
+      - NATS_SERVER=nats://nats-server:4222
+      - DATABASE_URL=${ORDER_DATABASE_URL}
+
+
+  payments-ms:
+    container_name: payments-ms
+    build: 
+     dockerfile: dockerfile.prod
+     context: ./payments-ms
+    image: payments-ms-prod
+    ports:
+      - ${PAYMENTS_MS_PORT}:${PAYMENTS_MS_PORT}
+    environment:
+      - PORT=${PAYMENTS_MS_PORT}
+      - NATS_SERVER=nats://nats-server:4222
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - SUCCESS_PAYMENT_URL=${SUCCESS_PAYMENT_URL}
+      - CANCELLED_PAYMENT_URL=${CANCELLED_PAYMENT_URL}
+
+  
