@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: auth
+  name: auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: auth
+    spec:
+      containers:
+      - image: us-east1-docker.pkg.dev/microservices-nest/image-registry/auth-ms
+        name: auth-ms
+        env:
+        - name: PORT
+          value: "3000"
+        - name: NATS_SERVER
+          value: "nats://nats"
+        - name: JWT_EXPIRES_IN
+          value: "2h"
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+             name: jwt-secret
+             key: JWT_SECRET
+        - name: MONGO_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+             name: mongo-secret
+             key: database_url
+        resources: {}
+status: {}

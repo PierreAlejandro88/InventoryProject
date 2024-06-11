@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: products
+  name: products
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: products
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: products
+    spec:
+      containers:
+      - image: us-east1-docker.pkg.dev/microservices-nest/image-registry/products-ms
+        name: products-ms
+        env:
+        - name: PORT
+          value: "3000"
+        - name: DATABASE_URL
+          value: "file:./dev.db"
+        - name: TRANSPORT
+          value: "TCP"
+        - name: NATS_SERVERS
+          value: "nats://nats"
+        
+        
+        resources: {}
+status: {}
